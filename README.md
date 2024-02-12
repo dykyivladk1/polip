@@ -1,4 +1,4 @@
-# PyTorch Model Visualizer
+# PyTorch Library for ML Projects
 
 ## Introduction
 This library is a Python Library designed to help machine learning practitioners and researchers with training models and provides some useful function that will enhance and speed up training. 
