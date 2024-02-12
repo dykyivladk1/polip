@@ -10,7 +10,7 @@ This library is a Python Library designed to help machine learning practitioners
 
 ## Installation
 This tool requires Python. Use this command:
-```pip install fypi```
+```pip install polip```
 
 
 ## Required Libraries for visualisation
