@@ -1,5 +1,5 @@
 
-# PyTorch Library for ML Projects
+# Library designed for enhancing productivity for AI developers
 
 ![Polip](images/polip.png)
 
@@ -14,29 +14,28 @@ This is a comprehensive library designed to facilitate various machine learning 
 
 ## Installation
 This tool requires Python. Use this command to install the library:
-\`\`\`bash
+```bash
 pip install polip
-\`\`\`
+```
 
 ## Required Libraries for Visualization
 Make sure to install the following required libraries:
-\`\`\`bash
+```bash
 pip install matplotlib os torch PIL numpy torchvision
-\`\`\`
+```
 
 ## Usage
 
 ### Custom Layers
-The library includes custom layers like \`PixelNormLayer\`, \`UpSample\`, and \`DownSample\`. Here's an example of how to use them:
+The library includes custom layers like `PixelNormLayer`, `UpSample`, and `DownSample`. Here's an example of how to use them:
 
-\`\`\`python
+```python
 from polip.cb import PixelNormLayer, UpSample, DownSample
-\`\`\`
+```
 
 ### Custom Image Dataset
-You can use the \`CustomImageDataset\` class to handle image datasets:
+You can use the `CustomImageDataset` class to handle image datasets:
 
-\`\`\`python
+```python
 from polip import CustomImageDataset, get_rgb_transform
-\`\`\`
-
+```
