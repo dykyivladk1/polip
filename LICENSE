@@ -19,3 +19,31 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+This software includes code from the following third-party libraries:
+
+1. **NumPy** (https://numpy.org/)
+   - Licensed under the BSD 3-Clause License.
+   - License file: https://numpy.org/license.html
+
+2. **PyTorch** (https://pytorch.org/)
+   - Licensed under the BSD 3-Clause License.
+   - License file: https://github.com/pytorch/pytorch/blob/master/LICENSE
+
+3. **Torchvision** (https://pytorch.org/vision/stable/index.html)
+   - Licensed under the BSD 3-Clause License.
+   - License file: https://github.com/pytorch/vision/blob/main/LICENSE
+
+4. **Matplotlib** (https://matplotlib.org/)
+   - Licensed under the PSF License and the Matplotlib License.
+   - License file: https://github.com/matplotlib/matplotlib/blob/main/LICENSE
+
+5. **Pillow (PIL)** (https://python-pillow.org/)
+   - Licensed under the HPND License.
+   - License file: https://github.com/python-pillow/Pillow/blob/main/LICENSE
+
+6. **Tifffile** (https://pypi.org/project/tifffile/)
+   - Licensed under the BSD 3-Clause License.
+   - License file: https://github.com/cgohlke/tifffile/blob/master/LICENSE.txt

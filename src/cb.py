@@ -1,7 +1,5 @@
-
 import torch
 import torch.nn as nn
-
 
 
 class PixelNormLayer(nn.Module):
@@ -28,7 +26,6 @@ class PixelNormLayer(nn.Module):
     
 
 
-
 class UpSample(nn.Module):
     """
     An upsampling layer that increases the spatial dimensions of the input using nearest neighbor upsampling
@@ -50,7 +47,6 @@ class UpSample(nn.Module):
 
     def forward(self, x, *args):
         return self.upsample(x)
-
 
 
 

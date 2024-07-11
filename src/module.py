@@ -101,12 +101,17 @@ class CustomImageDataset(Dataset):
     
 
 #print progress bar
-def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█', print_end="\r"):
+
+def print_progress_bar(iteration, total, mode=1, epoch=None, total_epochs=None, loss=None, prefix='', suffix='', decimals=1, length=50, fill='█', print_end="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
         iteration   - Required  : current iteration (Int)
         total       - Required  : total iterations (Int)
+        mode        - Required  : mode of the progress bar (1 or 2) (Int)
+        epoch       - Optional  : current epoch (Int, required for mode 2)
+        total_epochs- Optional  : total epochs (Int, required for mode 2)
+        loss        - Optional  : current loss (Float, required for mode 2)
         prefix      - Optional  : prefix string (Str)
         suffix      - Optional  : suffix string (Str)
         decimals    - Optional  : positive number of decimals in percent complete (Int)
@@ -117,85 +122,23 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
     bar = fill * filled_length + '-' * (length - filled_length)
-    sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+    
+    if mode == 1:
+        sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+    elif mode == 2 and epoch is not None and total_epochs is not None and loss is not None:
+        sys.stdout.write(f'\rEpoch {epoch}/{total_epochs} | {prefix} |{bar}| {percent}% | Loss: {loss:.4f} {suffix}')
     sys.stdout.flush()
+    
     if iteration == total: 
-        print() 
-        
-
-#denormalize
-def denormalize_tensor(tensor, mean, std):
-    """
-    Denormalizes a tensor using the provided mean and std.
-
-    Args:
-    - tensor (torch.Tensor): The image tensor to denormalize.
-    - mean (list or tuple): The mean used for normalization (per channel).
-    - std (list or tuple): The standard deviation used for normalization (per channel).
-
-    Returns:
-    - torch.Tensor: A denormalized image tensor.
-    """
-    if tensor.is_cuda:
-        mean = torch.tensor(mean, device=tensor.device)
-        std = torch.tensor(std, device=tensor.device)
-    else:
-        mean = torch.tensor(mean)
-        std = torch.tensor(std)
-
-    denormalized = tensor.clone()
-    for t, m, s in zip(denormalized, mean, std):
-        t.mul_(s).add_(m) 
-    return denormalized
+        print(print_end)
 
 
 
-def denormalize_numpy(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-    """
-    Denormalizes an image using the provided mean and std.
-
-    Args:
-    - image (numpy.ndarray or torch.Tensor): The normalized image to denormalize.
-    - mean (list or tuple): The mean used for normalization (per channel).
-    - std (list or tuple): The standard deviation used for normalization (per channel).
-
-    Returns:
-    - numpy.ndarray: A denormalized image.
-    """
-    mean = np.array(mean)
-    std = np.array(std)
-    if isinstance(image, torch.Tensor):
-        image = image.numpy()
-    
-    denormalized = image * std + mean 
-    denormalized = np.clip(denormalized, 0, 1)  
-    return denormalized
 
 
 
-def denormalize(image):
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    image = (image * std + mean).clip(0, 1)
-    return image
 
-#display image
-def display_image(tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-    """
-    Displays an image from a normalized tensor.
 
-    Args:
-    - tensor (torch.Tensor): The normalized image tensor to display.
-    - mean (list): The mean used for normalization (per channel).
-    - std (list): The standard deviation used for normalization (per channel).
-    """
-    tensor = denormalize(tensor, mean, std)
-    img = tensor.numpy().transpose((1, 2, 0))
-    img = np.clip(img, 0, 1)
-    plt.imshow(img)
-    plt.axis('off')  
-    plt.show()
-    
 
 
 def visualize_model(model, max_layers_per_subplot=10):
@@ -362,15 +305,7 @@ def gradient_penalty(critic, real, fake, alpha, train_step, device="cpu"):
 
 
 
-def visualize_image_pil(image_path):
-    """
-    Opens and displays an image using PIL.
 
-    Args:
-    - image_path (str): The file path to the image you want to display.
-    """
-    image = Image.open(image_path)
-    image.show()
     
 def count_files_in_folder(folder_path, subfolder=False):
     """
@@ -396,51 +331,6 @@ def count_files_in_folder(folder_path, subfolder=False):
         total_files = sum(os.path.isfile(os.path.join(folder_path, entry)) for entry in all_entries)
     
     return total_files
-
-
-
-def plot_loss(losses, title='Loss over epochs', xlabel='Epoch', ylabel='Loss'):
-    """
-    Plots the loss over epochs or iterations.
-
-    Args:
-    - losses (list or array): A list or array containing loss values.
-    - title (str): The title of the plot.
-    - xlabel (str): Label for the X-axis.
-    - ylabel (str): Label for the Y-axis.
-    """
-    plt.figure(figsize=(10, 5))
-    plt.plot(losses, label='Loss')
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-
-
-
-def plot_gan_losses(gen_losses, disc_losses, title='GAN Losses over epochs', xlabel='Epoch', ylabel='Loss'):
-    """
-    Plots the losses of the generator and discriminator over epochs or iterations.
-
-    Args:
-    - gen_losses (list or array): A list or array containing generator loss values.
-    - disc_losses (list or array): A list or array containing discriminator loss values.
-    - title (str): The title of the plot.
-    - xlabel (str): Label for the X-axis.
-    - ylabel (str): Label for the Y-axis.
-    """
-    plt.figure(figsize=(10, 5))
-    plt.plot(gen_losses, label='Generator Loss')
-    plt.plot(disc_losses, label='Discriminator Loss')
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
 
 
 
@@ -470,62 +360,6 @@ def check_model_device(model):
     return next(model.parameters()).device
 
 
-def move_files_in_folders(main_folder, destination_folder, var=2, copy=True):
-    '''
-    Move or copy files from a main folder to a destination folder based on the specified structure (VAR).
-    
-    Parameters:
-    main_folder (str): The path to the main folder containing the files or subfolders.
-    destination_folder (str): The path to the destination folder where files will be moved or copied.
-    var (int, optional): Determines the structure of the main folder. Default is 2.
-        - VAR 1: Assumes files are within subfolders in the main folder.
-        - VAR 2: Assumes files are directly within the main folder.
-    copy (bool, optional): If True, files will be copied instead of moved. Default is True.
-    
-    Behavior based on VAR value:
-    - VAR 1:
-        Assumes the main folder contains subfolders, each with files to move/copy.
-        Structure before moving/copying:
-        - Main folder
-            - Subfolder 1
-                - File 1
-                - File 2
-            - Subfolder 2
-                - File 3
-    
-    - VAR 2:
-        Assumes the main folder directly contains files to move/copy.
-        Structure before moving/copying:
-        - Main folder
-            - File 1
-            - File 2
-            - File 3
-    '''
-
-    if var == 1:
-        # Loop through each subfolder in the main folder.
-        for sub_name in os.listdir(main_folder):
-            subfolder_path = os.path.join(main_folder, sub_name)
-            # Loop through each file in the subfolder.
-            for name in os.listdir(subfolder_path):
-                path = os.path.join(subfolder_path, name)
-                # Ensure the destination folder exists.
-                os.makedirs(destination_folder, exist_ok=True)
-                # Copy or move the file to the destination folder.
-                if copy:
-                    shutil.copy(path, destination_folder)
-                else:
-                    shutil.move(path, destination_folder)
-                    
-    elif var == 2:
-        # Loop through each file in the main folder.
-        for name in os.listdir(main_folder):
-            path = os.path.join(main_folder, name)
-            # Copy or move the file to the destination folder.
-            if copy:
-                shutil.copy(path, destination_folder)
-            else:
-                shutil.move(path, destination_folder)
 
 
 
@@ -565,43 +399,6 @@ def move_files_in_folders(main_folder, destination_folder, var=2, copy=True):
 
     
 
-def back_toPil(image_tensor, show=True, denormalize=True, device = torch.device("mps")):
-    """
-    Converts a tensor image to a PIL image with optional denormalization and display.
-
-    Parameters:
-    image_tensor (torch.Tensor): The image tensor to convert.
-    show (bool): Whether to display the image using plt.imshow(). Default is True.
-    denormalize (bool): Whether to apply denormalization to the image tensor. Default is True.
-    device (torch.device): The device to use for tensor operations. Default is torch.device("mps").
-    
-    Returns:
-    PIL.Image.Image: The converted PIL image if show is False.
-    """
-    if image_tensor.dim() == 4:  
-        image_tensor = image_tensor.squeeze(0).to(device)
-
-    if denormalize:
-        mean = torch.tensor([0.485, 0.456, 0.406]).view(-1, 1, 1).to(device)  # Mean for normalization
-        std = torch.tensor([0.229, 0.224, 0.225]).view(-1, 1, 1).to(device)  # Std for normalization
-        image_tensor = image_tensor.to(device) * std.to(device) + mean.to(device)  # Denormalize image
-    
-    else:
-        image_tensor = image_tensor  
-
-    trans = tr.ToPILImage()  
-    image_pil = trans(image_tensor)
-
-    if show:
-        plt.imshow(image_pil) 
-        plt.axis("off")
-        plt.show()
-    else:
-        return image_pil  
-
-        
-    
-    
 
 
 
@@ -764,3 +561,138 @@ def generate_random_images(number_of_images, height=100, width=100, output_dir="
 
 
 
+
+
+
+
+import inspect
+
+def print_message(message):
+    frame = inspect.currentframe().f_back
+    line_no = frame.f_lineno
+    func_name = frame.f_code.co_name
+    file_name = frame.f_code.co_filename
+    
+    print(f"{message} - [Function: {func_name}, Line: {line_no}]")
+
+def check_p():
+    print_message("Triggered")
+
+
+
+
+def iterator_ls(list_, bord = 3):
+    for i in range(len(list_)):
+        print(f"item{[i]}:",list_[i].shape)
+        if i == bord: break
+
+def divider_mainer(text='', length=50):
+    if len(text) + 4 > length:
+        length = len(text) + 4  
+
+    top_border = "╔" + "═" * (length - 2) + "╗"
+    middle_pattern = "║ " + text.center(length - 4) + " ║"
+    bottom_border = "╚" + "═" * (length - 2) + "╝"
+    
+    print(top_border)
+    print(middle_pattern)
+    print(bottom_border)
+
+def divider_f(length=50):
+    start_pattern = '</>'
+    end_pattern = '</>'
+    middle_pattern = '-'
+    
+    middle_length = length - len(start_pattern) - len(end_pattern)
+    
+    middle_section = middle_pattern * middle_length
+    
+    separator_line = f"{start_pattern}{middle_section}{end_pattern}"
+    print(separator_line)
+
+
+
+
+def sender(*tensors):
+    """
+    Sends multiple tensors to the appropriate device based on availability.
+
+    The function will check for available devices in the following order:
+    1. MPS (for Apple Silicon)
+    2. CUDA (for NVIDIA GPUs)
+    3. CPU (default)
+
+    Parameters:
+    *tensors (torch.Tensor): Variable number of tensor arguments.
+
+    Returns:
+    list: A list of tensors moved to the determined device.
+    """
+    def decider():
+        if torch.backends.mps.is_available():
+            return torch.device('mps')
+        elif torch.cuda.is_available():
+            return torch.device('cuda')
+        else:
+            return torch.device('cpu')
+    
+    device = decider()
+    return [tensor.to(device) for tensor in tensors]
+
+
+
+
+
+def zipper_splitter(file_path, output_dir=None, chunk_size=1024*1024*1024):
+    """
+    Splits a large file into smaller chunks.
+    
+    Args:
+        file_path (str): Path to the large file to be split.
+        output_dir (str): Directory to save the file chunks. Defaults to the same directory as the input file.
+        chunk_size (int): Size of each chunk in bytes. Default is 1GB.
+    
+    Returns:
+        List of str: Paths to the created file chunks.
+    """
+    if output_dir is None:
+        output_dir = os.path.dirname(file_path)
+    
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    base_name = os.path.basename(file_path)
+    base_name_without_ext = os.path.splitext(base_name)[0]
+    part = 1
+    chunk_paths = []
+
+    with open(file_path, 'rb') as f:
+        chunk = f.read(chunk_size)
+        while chunk:
+            part_name = f"{base_name_without_ext}_part{part}.zip"
+            part_path = os.path.join(output_dir, part_name)
+            with open(part_path, 'wb') as chunk_file:
+                chunk_file.write(chunk)
+            print(f"Created {part_path}")
+            chunk_paths.append(part_path)
+            part += 1
+            chunk = f.read(chunk_size)
+    
+    return chunk_paths
+
+
+
+
+
+def analyze_MM(tensor):
+    """
+    Analyzes a PyTorch tensor and prints its minimum, maximum, mean, and standard deviation values.
+    
+    Parameters:
+    tensor (torch.Tensor): The input tensor to be analyzed.
+    """
+    print('Tensor Min Value:', tensor.min())
+    print('Tensor Max Value:', tensor.max())
+    print('-'*30)
+    print('Tensor Mean Value:', tensor.mean())
+    print('Tensor std Value:', tensor.std())
