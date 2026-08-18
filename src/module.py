@@ -565,7 +565,6 @@ def generate_random_images(number_of_images, height=100, width=100, output_dir="
 
 
 
-import inspect
 
 def print_message(message):
     frame = inspect.currentframe().f_back
